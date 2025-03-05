@@ -1,5 +1,7 @@
 ---
 title: "Stat380MiniProject"
 output: html_document
+author: "Jeffery Yue and Ben Howland"
+date: "2025-03-06"
 ---
 
