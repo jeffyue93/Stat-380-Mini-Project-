@@ -1,0 +1,167 @@
+---
+title: "Stat380MiniProject"
+output: html_document
+author: "Jeffery Yue and Ben Howland"
+date: "2025-03-06"
+---
+
+## Front Matter
+```{r}
+remove(list = ls())
+library(readr)
+library(readxl)
+library(tidyverse)
+library(lubridate)
+COD <- read_excel("CODGames2_mp.xlsx")
+```
+
+## Primary Weapon Exploration
+
+For this variable, we chose primary weapon, which displays the primary weapon used for that round. It is a categorical variable that displays the name of a weapon. There are no missing data in the dataset.
+```{r}
+table(COD$PrimaryWeapon)
+```
+
+The most used primary weapon is the M16, with 48 uses. The least used weapon is the MG82, with 2 uses.
+```{r}
+ggplot(data = COD,
+       mapping = aes(x = PrimaryWeapon)) +
+  geom_bar(fill = "red", color = "black") +
+  theme_minimal() +
+  labs(
+    x = "Primary Weapon",
+    y = "count",
+    title = "Primary Weapons Used"
+  )
+```
+
+There is a large difference in weapons used. The most popular weapons used are the M16 with 48, the MP5 with 45, and the Pellington 703 with 38. The least popular are the MG 82 with 2, the FFAR 1 with 3, and the AK-47 with 4. One interesting thing that I notice is that there is not much of a middle ground, weapons are either popular or not popular.
+
+## Deaths Exploration
+
+We chose Deaths as the next variable to explore. It is a quantitative variable that ranges in values from 4 to 42 in this dataset. There are no missing values for the Deaths variable. This variable displays the amount of deaths in that particular game.
+
+```{r}
+#Summary Statistics
+COD %>%
+  select(Deaths) %>%
+  summarize(min = min(Deaths),
+            max = max(Deaths),
+            mean = mean(Deaths),
+            median = median(Deaths),
+            standardDeviation = sd(Deaths))
+```
+
+The average amount of deaths in a game is 14.9763, with a standard deviation of 5.129226.
+
+```{r}
+#Histogram for distribution of deaths
+ggplot(data = COD,
+       mapping = aes(x = Deaths)) +
+  geom_histogram(binwidth = 2, fill = "blue", color = "black") +
+  theme_bw() +
+  labs(x = "Deaths",
+       y = "Number of Games",
+       title = "Deaths in Games")
+```
+
+From this distribution, we can see that the max, 42, is likely an outlier in this situation. We can also see that the data may be skewed a little to the right due to this, but mostly it is symmetrical. The mean of 14.9763 and median of 15 are very close together, meaning this data is mostly symmetrical. 
+
+## Choice Exploration
+
+The next variable we chose to analyze is Choice. The Choice variable is a categorical variable that displays the map that was chosen in the vote. The values are the map names. There is one missing value in this column, so we will omit it.
+
+```{r}
+is.na(COD$Choice)
+COD1 <- COD[!is.na(COD$Choice), ]
+```
+
+```{r}
+table(COD1$Choice)
+```
+
+The maps are listed with the amount of games that they were chosen. The most popular maps are Diesel, Crossroads Strike, and Rush, all with 15 games played. The least popular map is Amerika, with 3 games played.
+
+```{r}
+ggplot(data = COD1,
+       mapping = aes(x = Choice)) +
+  geom_bar(fill = "green", color = "black") +
+  theme_minimal() +
+  labs(x = "Map Choice",
+       y = "Number of Games",
+       title = "Distribution of Map Choice") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+The map distribution is shown above. While some maps are more popular than others, they are all relatively evenly chosen. There are not many surprises in this dataset, as the max is only 15 and the min is 3.
+
+## Eliminations Exploration
+
+The next variable is Eliminations. Eliminations is a quantitative variable that ranges from 2 to about 40. It displays the amount of eliminations a player gets in a game. There are no missing values in the column.
+
+```{r}
+kills = COD1 %>% reframe(Eliminations = Eliminations)
+summarykills = kills %>% summarise(num = n(), mean = mean(Eliminations),median = median(Eliminations), max = max(Eliminations), min = min(Eliminations), std = sd(Eliminations))
+print(summarykills)
+```
+```{r}
+ggplot(data = kills, mapping = aes(x = Eliminations)) + geom_histogram(bins = 40, fill = "darkred", color = "black") + labs(title = "Number of Eliminations")
+```
+
+The distribution of eliminations is right skewed with a mean of 15.11 and a standard deviation of 6.14. There are 2 outliers of 35 and 39 eliminations. 
+
+## Score Exploration
+
+The next variable is Score, and it is a quantitative variable that measures a player's score throughout the game. The values range from about 100 to 8000. There are not missing values in the column.
+
+```{r}
+score = COD1 %>% reframe(Score = Score)
+summaryscore = score %>% summarise(num = n(), mean = mean(Score), median = median(Score), max = max(Score), min = min(Score), std = sd(Score))
+print(summaryscore)
+```
+```{r}
+ggplot(data = score, mapping = aes(x = Score)) + geom_histogram(bins = 40, fill = "green", color = "black") + labs(title = "In Game Score")
+```
+
+The distribution of score is right skewed with a mean of 2948.4 and a standard deviation of 1467.4.
+
+
+## Potential Questions
+1. What do the variables "confirms" and "denies" represent?
+2. How is the "TotalXP" variable calculated?
+3. Why does is max result in a game not always 100 ("result" variable )?
+
+## TotalXP vs time
+```{r}
+COD2 = COD1 %>% mutate(month = month(Date))
+COD2$month[1:84] = "June"
+COD2$month[85:187] = "July"
+COD2$month[188:210] = "August"
+ggplot(data = COD2, mapping = aes(x = month, y = TotalXP)) + geom_boxplot() + labs(x = "Month", y = "Total XP Earned", title = "Total XP Earned per Game by Month")
+```
+The plot appears to show a fairly consistent performance across the 3 months. The player appears to not show any consistent improvement or regression in XP earned. 
+
+The total XP earned is also affected by the variable XPType, so it's possible only counting the raw XP earned would be more effective.
+
+## RawTotalXP Vs time
+```{r}
+COD3 = COD2 %>% mutate(RawTotalXP = ifelse(XPType != "10% Boost", (TotalXP/1.1)/2, TotalXP/1.1))
+ggplot(data = COD3, mapping = aes(x = month, y = RawTotalXP)) + geom_boxplot() + labs(x = "Month", y = "Raw Total XP Earned", title = "Raw Total XP Earned per Game by Month")
+```
+
+## Group Question: What is the relationship between Eliminations and Deaths?
+
+The relationship between Eliminations and Deaths is between two quantitative variables. Neither are missing any values.
+
+```{r}
+ggplot(data = COD,
+       mapping = aes(x = Eliminations,
+                     y = Deaths)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE) +
+  labs(x = "Eliminations",
+       y = "Deaths",
+       title = "Relationship Between Eliminations and Deaths")
+```
+
+The scatterplot shows the relationship between Eliminations and Deaths. The linear regression line shows that there is a small positive correlation between Eliminations and Deaths. This is surprising to me because I would think that the more Eliminations one has, the better player they are and therefore the less Deaths. In reality, the players with more Eliminations are more active and put in a position to be killed. 
