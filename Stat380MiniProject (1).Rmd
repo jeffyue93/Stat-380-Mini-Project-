@@ -7,9 +7,89 @@ date: "2025-03-06"
 
 # Front Matter
 ```{r}
+remove(list = ls())
 library(readr)
 library(readxl)
 library(tidyverse)
-read_excel("C:/Users/benja/Downloads/CODGames2_mp.xlsx")
+COD <- read_excel("C:/Users/benja/Downloads/CODGames2_mp.xlsx")
 ```
 
+# Primary Weapon Exploration
+
+For this variable, we chose primary weapon, which displays the primary weapon used for that round. It is a categorical variable that displays the name of a weapon. There are no missing data in the dataset.
+```{r}
+table(COD$PrimaryWeapon)
+```
+
+The most used primary weapon is the M16, with 48 uses. The least used weapon is the MG82, with 2 uses.
+```{r}
+ggplot(data = COD,
+       mapping = aes(x = PrimaryWeapon)) +
+  geom_bar(fill = "red", color = "black") +
+  theme_minimal() +
+  labs(
+    x = "Primary Weapon",
+    y = "count",
+    title = "Primary Weapons Used"
+  )
+```
+
+There is a large difference in weapons used. The most popular weapons used are the M16 with 48, the MP5 with 45, and the Pellington 703 with 38. The least popular are the MG 82 with 2, the FFAR 1 with 3, and the AK-47 with 4. One interesting thing that I notice is that there is not much of a middle ground, weapons are either popular or not popular.
+
+# Deaths Exploration
+
+We chose Deaths as the next variable to explore. It is a quantitative variable that ranges in values from 4 to 42 in this dataset. There are no missing values for the Deaths variable. This variable displays the amount of deaths in that particular game.
+
+```{r}
+#Summary Statistics
+COD %>%
+  select(Deaths) %>%
+  summarize(min = min(Deaths),
+            max = max(Deaths),
+            mean = mean(Deaths),
+            median = median(Deaths),
+            standardDeviation = sd(Deaths))
+```
+
+The average amount of deaths in a game is 14.9763, with a standard deviation of 5.129226.
+
+```{r}
+#Histogram for distribution of deaths
+ggplot(data = COD,
+       mapping = aes(x = Deaths)) +
+  geom_histogram(binwidth = 2, fill = "blue", color = "black") +
+  theme_bw() +
+  labs(x = "Deaths",
+       y = "Number of Games",
+       title = "Deaths in Games")
+```
+
+From this distribution, we can see that the max, 42, is likely an outlier in this situation. We can also see that the data may be skewed a little to the right due to this, but mostly it is symmetrical. The mean of 14.9763 and median of 15 are very close together, meaning this data is mostly symmetrical. 
+
+# Choice Exploration
+
+The next variable we chose to analyze is Choice. The Choice variable is a categorical variable that displays the map that was chosen in the vote. The values are the map names. There is one missing value in this column, so we will omit it.
+
+```{r}
+is.na(COD$Choice)
+COD1 <- COD[!is.na(COD$Choice), ]
+```
+
+```{r}
+table(COD1$Choice)
+```
+
+The maps are listed with the amount of games that they were chosen. The most popular maps are Diesel, Crossroads Strike, and Rush, all with 15 games played. The least popular map is Amerika, with 3 games played.
+
+```{r}
+ggplot(data = COD1,
+       mapping = aes(x = Choice)) +
+  geom_bar(fill = "green", color = "black") +
+  theme_minimal() +
+  labs(x = "Map Choice",
+       y = "Number of Games",
+       title = "Distribution of Map Choice") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+The map distribution is shown above. While some maps are more popular than others, they are all relatively evenly chosen. There are not many surprises in this dataset, as the max is only 15 and the min is 3.
