@@ -11,7 +11,7 @@ remove(list = ls())
 library(readr)
 library(readxl)
 library(tidyverse)
-COD <- read_excel("C:/Users/benja/Downloads/CODGames2_mp.xlsx")
+COD <- read_excel("CODGames2_mp.xlsx")
 ```
 
 # Primary Weapon Exploration
@@ -93,3 +93,25 @@ ggplot(data = COD1,
 ```
 
 The map distribution is shown above. While some maps are more popular than others, they are all relatively evenly chosen. There are not many surprises in this dataset, as the max is only 15 and the min is 3.
+
+## Eliminations
+```{r}
+kills = COD1 %>% reframe(Eliminations = Eliminations)
+summarykills = kills %>% summarise(num = n(), mean = mean(Eliminations),median = median(Eliminations), max = max(Eliminations), min = min(Eliminations), std = sd(Eliminations))
+print(summarykills)
+```
+```{r}
+ggplot(data = kills, mapping = aes(x = Eliminations)) + geom_histogram(bins = 40, fill = "darkred", color = "black") + labs(title = "Number of Eliminations")
+```
+The distribution of eliminations is right skewed with a mean of 15.11 and a standard deviation of 6.14. There are 2 outliers of 35 and 39 eliminations. 
+
+## Score
+```{r}
+score = COD1 %>% reframe(Score = Score)
+summaryscore = score %>% summarise(num = n(), mean = mean(Score), median = median(Score), max = max(Score), min = min(Score), std = sd(Score))
+print(summaryscore)
+```
+```{r}
+ggplot(data = score, mapping = aes(x = Score)) + geom_histogram(bins = 40, fill = "green", color = "black") + labs(title = "In Game Score")
+```
+The distribution of score is right skewed with a mean of 2948.4 and a standard deviation of 1467.4. 
