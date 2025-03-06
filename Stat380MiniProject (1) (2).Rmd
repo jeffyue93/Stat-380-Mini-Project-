@@ -164,4 +164,8 @@ ggplot(data = COD,
        title = "Relationship Between Eliminations and Deaths")
 ```
 
-The scatterplot shows the relationship between Eliminations and Deaths. The linear regression line shows that there is a small positive correlation between Eliminations and Deaths. This is surprising to me because I would think that the more Eliminations one has, the better player they are and therefore the less Deaths. In reality, the players with more Eliminations are more active and put in a position to be killed. 
+The scatterplot shows the relationship between Eliminations and Deaths. The linear regression line shows that there is a small positive correlation between Eliminations and Deaths. This is surprising to me because I would think that the more Eliminations one has, the better player they are and therefore the less Deaths. In reality, the players with more Eliminations are more active and put in a position to be killed.
+
+## Group Contributions
+
+We worked on this assignment together, giving each other feedback and reading over each other reports. While we worked together, we also each did some of the explorations alone and then read each others over. Jeff did the Score and Elimination explorations, while Ben did the Primary Weapon, Choice, and Deaths exploration. We both worked together on the questions and the final two tasks. 
