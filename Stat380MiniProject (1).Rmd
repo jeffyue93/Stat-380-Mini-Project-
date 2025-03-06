@@ -11,6 +11,7 @@ remove(list = ls())
 library(readr)
 library(readxl)
 library(tidyverse)
+library(lubridate)
 COD <- read_excel("CODGames2_mp.xlsx")
 ```
 
@@ -115,3 +116,30 @@ print(summaryscore)
 ggplot(data = score, mapping = aes(x = Score)) + geom_histogram(bins = 40, fill = "green", color = "black") + labs(title = "In Game Score")
 ```
 The distribution of score is right skewed with a mean of 2948.4 and a standard deviation of 1467.4. 
+
+
+## Potential Questions
+1. What do the variables "confirms" and "denies" represent?
+2. How is the "TotalXP" variable calculated?
+3. Why does is max result in a game not always 100 ("result" variable )?
+
+## TotalXP vs time
+```{r}
+COD2 = COD1 %>% mutate(month = month(Date))
+COD2$month[1:84] = "June"
+COD2$month[85:187] = "July"
+COD2$month[188:210] = "August"
+ggplot(data = COD2, mapping = aes(x = month, y = TotalXP)) + geom_boxplot() + labs(x = "Month", y = "Total XP Earned", title = "Total XP Earned per Game by Month")
+```
+The plot appears to show a fairly consistent performance across the 3 months. The player appears to not show any consistent improvement or regression in XP earned. 
+
+The total XP earned is also affected by the variable XPType, so it's possible only counting the raw XP earned would be more effective.
+
+##RawTotalXP Vs time
+```{r}
+COD3 = COD2 %>% mutate(RawTotalXP = ifelse(XPType != "10% Boost", (TotalXP/1.1)/2, TotalXP/1.1))
+ggplot(data = COD3, mapping = aes(x = month, y = RawTotalXP)) + geom_boxplot() + labs(x = "Month", y = "Raw Total XP Earned", title = "Raw Total XP Earned per Game by Month")
+```
+
+
+
