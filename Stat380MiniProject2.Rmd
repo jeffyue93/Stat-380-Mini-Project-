@@ -1,5 +1,49 @@
 ---
 title: "Stat380MiniProject2"
 output: html_document
+author: "Jeffery Yue and Ben Howland"
+date: "04/03/2025"
 ---
+
+## Front Matter
+```{r}
+library(tidyverse)
+library(readxl)
+cod = read_excel("CODGames2_mp.xlsx")
+```
+
+## Problem 1: Why not to use na.omit
+```{r}
+count = 0
+for (i in 1:nrow(cod)){
+  bool = FALSE
+  for (j in ncol(cod)){
+    if (is.na(cod[i,j] == TRUE)){
+      bool = TRUE
+    }
+  }
+  if (bool == TRUE)
+    count = count+1
+}
+print(count)
+```
+The majority of the entries in the data set have NAs so na.omit would result in a massive loss of data. There would be nearly no rows of data to use for analysis or exploration.
+
+## Exploration 
+```{r}
+
+```
+
+## Problem 3: Win/Loss Rates
+```{r}
+Splitresult = str_split_fixed(cod$Result, "-", 2)
+colnames(Splitresult) = c("Team", "Opponent")
+Splitresult2 = data.frame(Splitresult)
+Team = as.numeric(unlist(Splitresult2$Team))
+Opponent = as.numeric(unlist(Splitresult2$Opponent))
+Splitresult3 = data.frame(Team, Opponent)
+codwins = Splitresult3 %>% mutate(Win = ifelse(Team > Opponent, TRUE, FALSE), Loss = ifelse(Team < Opponent, TRUE, FALSE), Draw = ifelse(Team == Opponent, TRUE, FALSE))
+codwinrate = c(nrow(codwins[codwins$Win == TRUE,])/nrow(codwins), nrow(codwins[codwins$Loss == TRUE,])/nrow(codwins), nrow(codwins[codwins$Draw,])/nrow(codwins))
+print(codwinrate)
+```
 
