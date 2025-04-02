@@ -1,0 +1,5 @@
+---
+title: "Stat380MiniProject2"
+output: html_document
+---
+
