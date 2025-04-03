@@ -172,7 +172,12 @@ codwinrate = c(nrow(codwins[codwins$Win == TRUE,])/nrow(codwins), nrow(codwins[c
 print(codwinrate)
 ```
 
+The likelihood that a randomly selected case would be a win is 0.5403. The likelihood that a randomly selected case would be a loss is 0.4455. The likelihood that a randomly selected case would be a draw is 0.0142.
+
 ## Problem 4: Logistic Regression
+
+Does the player's score have an impact on whether or not that team won the round?
+
 ```{r}
 COD2 = COD %>% mutate(Win = codwins$Win)
 model1 = glm(Win~Score, family = binomial, data = COD2)
@@ -181,3 +186,4 @@ summary(model1)
 
 $$\frac{\hat{p}_i}{1-\hat{p}_i}=e^{-0.3324+0.0001689x_{i,Score}}$$
 
+The log odds of winning increase by 0.0001689 per added score, assuming all else stays constant. The actual odds increase by e^0.0001689 per one added score. Therefore, the score does have an impact, as a higher score gives higher odds that they will win.
