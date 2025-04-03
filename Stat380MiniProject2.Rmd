@@ -172,3 +172,12 @@ codwinrate = c(nrow(codwins[codwins$Win == TRUE,])/nrow(codwins), nrow(codwins[c
 print(codwinrate)
 ```
 
+## Problem 4: Logistic Regression
+```{r}
+COD2 = COD %>% mutate(Win = codwins$Win)
+model1 = glm(Win~Score, family = binomial, data = COD2)
+summary(model1)
+```
+
+$$\frac{\hat{p}_i}{1-\hat{p}_i}=e^{-0.3324+0.0001689x_{i,Score}}$$
+
