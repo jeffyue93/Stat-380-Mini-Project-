@@ -10,7 +10,7 @@ date: "04/03/2025"
 remove(list = ls())
 library(tidyverse)
 library(readxl)
-COD = read_excel("CODGames2_mp.xlsx")
+COD <- read_excel("C:/Users/benja/Downloads/CODGames2_mp.xlsx")
 ```
 
 ## Problem 1: Why not to use na.omit
@@ -187,3 +187,7 @@ summary(model1)
 $$\frac{\hat{p}_i}{1-\hat{p}_i}=e^{-0.3324+0.0001689x_{i,Score}}$$
 
 The log odds of winning increase by 0.0001689 per added score, assuming all else stays constant. The actual odds increase by e^0.0001689 per one added score. Therefore, the score does have an impact, as a higher score gives higher odds that they will win.
+
+## Group Evaluation
+
+We worked together on the project, using materials from this class and the web. We both worked on every problem, discussing and reviewing each problem jointly. We both had equal contributions to the group. 
