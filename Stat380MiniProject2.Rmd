@@ -7,18 +7,19 @@ date: "04/03/2025"
 
 ## Front Matter
 ```{r}
+remove(list = ls())
 library(tidyverse)
 library(readxl)
-cod = read_excel("CODGames2_mp.xlsx")
+COD = read_excel("CODGames2_mp.xlsx")
 ```
 
 ## Problem 1: Why not to use na.omit
 ```{r}
 count = 0
-for (i in 1:nrow(cod)){
+for (i in 1:nrow(COD)){
   bool = FALSE
-  for (j in ncol(cod)){
-    if (is.na(cod[i,j] == TRUE)){
+  for (j in ncol(COD)){
+    if (is.na(COD[i,j] == TRUE)){
       bool = TRUE
     }
   }
@@ -29,14 +30,138 @@ print(count)
 ```
 The majority of the entries in the data set have NAs so na.omit would result in a massive loss of data. There would be nearly no rows of data to use for analysis or exploration.
 
-## Exploration 
-```{r}
+## Variable Exploration
 
+# Damage Exploration
+
+Damage is a variable in the COD dataset. It displays the amount of damage done to other players in that round. It is a quantitative variable and there are no missing values in the dataset.
+```{r}
+#Summary Statistics
+COD %>%
+  select(Damage) %>%
+  summarize(min = min(Damage),
+            max = max(Damage),
+            mean = mean(Damage),
+            median = median(Damage),
+            standardDeviation = sd(Damage))
 ```
+
+The average amount of damage done per game is 415.1659, with a standard deviation of 166.3132.
+
+```{r}
+#Histogram displaying distribution of damage done
+ggplot(data = COD,
+       mapping = aes(x = Damage)) +
+  geom_histogram(binwidth = 50, fill = "red", color = "black") +
+  theme_bw() +
+  labs(x = "Damage Dealt",
+       y = "Number of Games",
+       title = "Damage Dealt in Games")
+```
+
+You can see that the data is mostly symmetrical around the mean, 415.1659, but there are some amount of damage that seem like they could be possible outliers, such as the maximum, which is 960 damage.
+
+# GameType Exploration
+
+GameType is a variable in the COD dataset. It is a categorical variable that displays the gamemode chosen for that match. In call of duty, there are multiple game modes that can be played. All instances in GameType have HC before the gamemode; this stands for hardcore mode which is a more difficult version of the game. The values can range from team deathmatch (TDM) to things like Hardpoint. There are no missing values in the data. There are four gamemodes.
+
+```{r}
+table(COD$GameType)
+```
+
+The overwhelming most popular gamemode is Team Deathmatch (TDM).
+
+```{r}
+ggplot(data = COD,
+       mapping = aes(x = GameType)) +
+  geom_bar(fill = "cyan", color = "black") +
+  theme_minimal() +
+  labs(x = "Gamemode",
+       y = "Number of Games",
+       title = "Distribution of Game Type")
+```
+
+This puts into perspective just how much more popular TDM is than the other gamemodes. This is likely because TDM is the most popular game in COD, and it is the most well-known. WIth 197/211 games in this dataset, the probability of a random game from this dataset being TDM is 93.36%.
+
+# DidPlayerVote Exploration
+
+DidPlayerVote is a variable in the COD dataset. This variable is a binary variable, as the only possible answers are "Yes" and "No". It is a categorical variable. This variable likely is referring to the vote at the end of the game for the MVP. In Call of Duty, players may vote at the end for an MVP, and this column records whether or not that player voted. There are no missing values in the dataset.
+
+```{r}
+table(COD$DidPlayerVote)
+```
+
+As you can see from the table, all 211 out of 211 data points were No.
+
+```{r}
+ggplot(data = COD,
+       mapping = aes(x = DidPlayerVote)) +
+  geom_bar(fill = "orange", color = "black") +
+  theme_minimal() +
+  labs(x = "Did the Player Vote?",
+       y = "Number of Games",
+       title = "Distribution of Player Votes")
+```
+
+This bar graph is minimally helpful, as every single data point did not vote for an MVP. There is a 100% chance that, when picking a random data point, the player would not have voted.
+
+# XPType Exploration
+
+XPType is a variable in the COD Dataset. It is a categorical variable that displays the "Boost" a player has on their XP. The XP is used to calculate a players score, and the boost gives them extra XP. There are no missing values in the data, and the only two types in the dataset are "10% Boost" and "Double XP + 10%".
+
+```{r}
+table(COD$XPType)
+```
+
+10% Boost is slighlty more popular, with 129/211 cases with that type, while Double XP + 10% has a proportion of 82/211.
+
+```{r}
+ggplot(data = COD,
+       mapping = aes(x = XPType)) +
+  geom_bar(fill = "purple", color = "black") +
+  theme_minimal() +
+  labs(x = "XP Type",
+       y = "Number of Games",
+       title = "Distribution of XP Types")
+```
+
+As you can see from the graph, the 10% boost is slightly more popular in the dataset than the Double XP + 10%. I do notice that there is no option for no boost, meaning that maybe the game gives everyone at least a 10% boost so that they think they are at an advantage when really they are not.
+
+# TotalXP Exploration
+
+TotalXP is a variable in the COD Dataset. It is a quantitative variable that displays the amount of XP a player earned in that round. There are no missing values in this dataset. A higher number means a better game for that player.
+
+```{r}
+COD %>%
+  select(TotalXP) %>%
+  summarize(min = min(TotalXP),
+            max = max(TotalXP),
+            mean = mean(TotalXP),
+            median = median(TotalXP),
+            standardDeviation = sd(TotalXP))
+```
+
+The mean XP for a game in this dataset is 11,975.4, with a standard deviation of 6166.652.
+
+```{r}
+ggplot(data = COD,
+       mapping = aes(x = TotalXP)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    x = "Total XP",
+    title = "Distribution of Total XP"
+  )
+```
+
+As you can see from the boxplot, the mean of 11975.4 appears on the left side of the screen due to the fact that the data is skewed right. There are many outliers on the right, including the max which is 43816. 
+
+
+
 
 ## Problem 3: Win/Loss Rates
 ```{r}
-Splitresult = str_split_fixed(cod$Result, "-", 2)
+Splitresult = str_split_fixed(COD$Result, "-", 2)
 colnames(Splitresult) = c("Team", "Opponent")
 Splitresult2 = data.frame(Splitresult)
 Team = as.numeric(unlist(Splitresult2$Team))
