@@ -10,13 +10,44 @@ date: "04/28/25"
 remove(list = ls())
 library(tidyverse)
 library(readxl)
+library(glmnet)
 COD <- read_excel("CODGames2_mp.xlsx")
 ```
 
 
 ## Problem 1
 ```{r}
-COD2 = COD %>% filter(FullPartial == "Full")
+COD2 = COD %>% 
+  filter(FullPartial == "Full")
 ggplot(data = COD2, mapping = aes(x = XPType, y = TotalXP))+geom_boxplot()+labs(x = "XP Type", y = "Total XP")
+```
+
+
+
+## Problem 2
+
+```{r}
+#Code to determine if a player won that specific game
+Splitresult = str_split_fixed(COD2$Result, "-", 2)
+colnames(Splitresult) = c("Team", "Opponent")
+Splitresult2 = data.frame(Splitresult)
+Team = as.numeric(unlist(Splitresult2$Team))
+Opponent = as.numeric(unlist(Splitresult2$Opponent))
+Splitresult3 = data.frame(Team, Opponent)
+codwins = Splitresult3 %>% mutate(Win = ifelse(Team > Opponent, TRUE, FALSE), Loss = ifelse(Team < Opponent, TRUE, FALSE), Draw = ifelse(Team == Opponent, TRUE, FALSE))
+
+COD3 = COD2 %>% mutate(Win = codwins$Win)
+```
+
+```{r}
+COD3 <- COD3 %>%
+  filter(GameType == "HC - TDM")
+
+lassoModel <- glmnet(x = ,
+                     y = ,
+                     family = "gaussian",
+                     alpha = 1,
+                     lambda = NULL,
+                     standardize = TRUE)
 ```
 
