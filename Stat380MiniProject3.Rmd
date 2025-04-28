@@ -24,6 +24,7 @@ ggplot(data = COD2, mapping = aes(x = XPType, y = TotalXP))+geom_boxplot()+labs(
 
 
 
+
 ## Problem 2
 
 ```{r}
