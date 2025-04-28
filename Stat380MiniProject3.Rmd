@@ -20,3 +20,4 @@ COD2 = COD %>% filter(FullPartial == "Full")
 ggplot(data = COD2, mapping = aes(x = XPType, y = TotalXP))+geom_boxplot()+labs(x = "XP Type", y = "Total XP")
 ```
 
+hello
