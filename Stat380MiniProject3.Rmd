@@ -1,0 +1,22 @@
+---
+title: "Stat380MiniProject3"
+output: html_document
+author: "Jeffery Yue and Ben Howland"
+date: "04/28/25"
+---
+
+## Front Matter
+```{r}
+remove(list = ls())
+library(tidyverse)
+library(readxl)
+COD <- read_excel("CODGames2_mp.xlsx")
+```
+
+
+## Problem 1
+```{r}
+COD2 = COD %>% filter(FullPartial == "Full")
+ggplot(data = COD2, mapping = aes(x = XPType, y = TotalXP))+geom_boxplot()+labs(x = "XP Type", y = "Total XP")
+```
+
