@@ -44,11 +44,10 @@ COD3 = COD2 %>% mutate(Win = codwins$Win)
 COD3 <- COD3 %>%
   filter(GameType == "HC - TDM")
 
-lassoModel <- glmnet(x = ,
-                     y = ,
-                     family = "gaussian",
-                     alpha = 1,
-                     lambda = NULL,
-                     standardize = TRUE)
+XMat <- model.matrix(TotalXP ~ Eliminations + Deaths + Damage + XPType + Win, data = COD3)[,-1]
+YVec <- COD3$TotalXP
+
+lassoModel <- glmnet(x = XMat,
+                     y = YVec)
 ```
 
