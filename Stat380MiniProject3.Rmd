@@ -21,8 +21,11 @@ COD2 = COD %>%
   filter(FullPartial == "Full")
 ggplot(data = COD2, mapping = aes(x = XPType, y = TotalXP))+geom_boxplot()+labs(x = "XP Type", y = "Total XP")
 ```
-
-
+```{r}
+summary = COD2 %>% group_by(XPType) %>% summarise(Min = min(TotalXP), Max = max(TotalXP), Mean = mean(TotalXP), Median = median(TotalXP), StdDev = sd(TotalXP))
+print(summary)
+```
+The games with Double XP tend to have much higher total XP values than the games with just the 10% boost. The double XP games also have a higher standard deviation and more outliers indicating more variation. 
 
 
 ## Problem 2
