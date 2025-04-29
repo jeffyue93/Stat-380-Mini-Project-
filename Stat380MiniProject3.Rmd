@@ -21,11 +21,14 @@ COD2 = COD %>%
   filter(FullPartial == "Full")
 ggplot(data = COD2, mapping = aes(x = XPType, y = TotalXP))+geom_boxplot()+labs(x = "XP Type", y = "Total XP")
 ```
+```{r}
+summary = COD2 %>% group_by(XPType) %>% summarise(Min = min(TotalXP), Max = max(TotalXP), Mean = mean(TotalXP), Median = median(TotalXP), StdDev = sd(TotalXP))
+print(summary)
+```
+The games with Double XP tend to have much higher total XP values than the games with just the 10% boost. The double XP games also have a higher standard deviation and more outliers indicating more variation. 
 
 
-
-
-## Problem 2
+## Problem 2a
 
 ```{r}
 #Code to determine if a player won that specific game
@@ -47,12 +50,55 @@ COD3 <- COD3 %>%
 XMat <- model.matrix(TotalXP ~ Eliminations + Deaths + Damage + XPType + Win, data = COD3)[,-1]
 YVec <- COD3$TotalXP
 
-lassoModel <- glmnet(x = XMat,
-                     y = YVec,
+set.seed(123)
+lassoCV <- cv.glmnet(x = XMat, y = YVec,
                      family = "gaussian",
-                     alpha = 1,
                      lambda = NULL,
-                     standardize = TRUE)
+                     standardize = TRUE,
+                     nfolds = 10)
+set.seed(NULL)
+
+plot(lassoCV)
+
+lassoCV$lambda.min
 ```
+
+The optimal value for lambda is 107.5504 using lasso cross-validation with nfolds = 10.
+
+```{r}
+coefLamMin <- predict(lassoCV, s = lassoCV$lambda.min, type = "coefficients")
+print(coefLamMin)
+```
+
+The equation for the lasso method is 
+$$TotalXP = 1864.4863 + 438.7217x_{i, Eliminations} + 7368.3666x_{i, XPTypeDouble XP + 10%} + 1107.7902x_{i, WinTRUE}$$
+
+```{r}
+set.seed(123)
+ridgeCV <- cv.glmnet(x = XMat, y = YVec,
+                    family = "gaussian",
+                    alpha = 0, 
+                    lambda = NULL,
+                    standardize = TRUE,
+                    nfolds = 10)
+set.seed(NULL)
+
+plot(ridgeCV)
+
+ridgeCV$lambda.min
+```
+
+The optimal value for lambda using Ridge with nfolds = 10 is 404.9202.
+
+```{r}
+coefRidMin <- predict(ridgeCV, s = ridgeCV$lambda.min, type = "coefficients")
+print(coefRidMin)
+```
+
+The equation for the ridge technique is
+$$TotalXP = 1696.2419 + 341.9336x_{i, Eliminations} + 13.1478x_{i, Deaths} + 3.4707x_{i, Damage} + 7114.0311x_{i, XPTypeDouble_XP_10%} + 1270.7964x_{i, WinTRUE}$$
+
+The Lasso Method eliminated Deaths and Damage, while Ridge kept smaller values for them. They both had extremely large coefficients for XPType (double XP + 10%). This shows that that may be the most important variable for predicting the Total XP. Lasso made a simpler model, as it eliminated some variables.
+
 
 
