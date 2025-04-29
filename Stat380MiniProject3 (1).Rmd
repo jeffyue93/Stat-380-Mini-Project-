@@ -1,0 +1,143 @@
+---
+title: "Stat380MiniProject3"
+output: html_document
+author: "Jeffery Yue and Ben Howland"
+date: "04/28/25"
+---
+
+## Front Matter
+```{r}
+remove(list = ls())
+library(tidyverse)
+library(readxl)
+library(glmnet)
+library(rpart)
+library(rattle)
+COD <- read_excel("CODGames2_mp.xlsx")
+```
+
+
+## Problem 1
+```{r}
+COD2 = COD %>% 
+  filter(FullPartial == "Full")
+ggplot(data = COD2, mapping = aes(x = XPType, y = TotalXP))+geom_boxplot()+labs(x = "XP Type", y = "Total XP")
+```
+```{r}
+summary = COD2 %>% group_by(XPType) %>% summarise(Min = min(TotalXP), Max = max(TotalXP), Mean = mean(TotalXP), Median = median(TotalXP), StdDev = sd(TotalXP))
+print(summary)
+```
+The games with Double XP tend to have much higher total XP values than the games with just the 10% boost. The double XP games also have a higher standard deviation and more outliers indicating more variation. 
+
+
+## Problem 2a
+
+```{r}
+#Code to determine if a player won that specific game
+Splitresult = str_split_fixed(COD2$Result, "-", 2)
+colnames(Splitresult) = c("Team", "Opponent")
+Splitresult2 = data.frame(Splitresult)
+Team = as.numeric(unlist(Splitresult2$Team))
+Opponent = as.numeric(unlist(Splitresult2$Opponent))
+Splitresult3 = data.frame(Team, Opponent)
+codwins = Splitresult3 %>% mutate(Win = ifelse(Team > Opponent, TRUE, FALSE), Loss = ifelse(Team < Opponent, TRUE, FALSE), Draw = ifelse(Team == Opponent, TRUE, FALSE))
+
+COD3 = COD2 %>% mutate(Win = codwins$Win)
+```
+
+```{r}
+COD3 <- COD3 %>%
+  filter(GameType == "HC - TDM")
+
+XMat <- model.matrix(Score ~ TotalXP + Eliminations + Deaths + Damage + XPType + Win, data = COD3)[,-1]
+YVec <- COD3$Score
+
+set.seed(123)
+lassoCV <- cv.glmnet(x = XMat, y = YVec,
+                     family = "gaussian",
+                     lambda = NULL,
+                     standardize = TRUE,
+                     nfolds = 10)
+set.seed(NULL)
+
+plot(lassoCV)
+
+lassoCV$lambda.min
+```
+
+The optimal value for lambda is lambda min at 2.611974 using lasso cross-validation with nfolds = 10.
+
+```{r}
+coefLamMin <- predict(lassoCV, s = lassoCV$lambda.min, type = "coefficients")
+print(coefLamMin)
+```
+
+The equation for the lasso method is 
+$$Score = 937.1569 + 0.0598x_{i, TotalXP} + 159.1294x_{i, Eliminations} - 72.7782x_{i, Deaths} + 0.9477x_{i, Damage} - 361.5755x_{i, XPType} - 447.192x_{i, WinTRUE}$$
+
+```{r}
+set.seed(123)
+ridgeCV <- cv.glmnet(x = XMat, y = YVec,
+                    family = "gaussian",
+                    alpha = 0, 
+                    lambda = NULL,
+                    standardize = TRUE,
+                    nfolds = 10)
+set.seed(NULL)
+
+plot(ridgeCV)
+
+ridgeCV$lambda.min
+```
+
+The optimal value for lambda using Ridge with nfolds = 10 is lambda min at  121.2371.
+
+```{r}
+coefRidMin <- predict(ridgeCV, s = ridgeCV$lambda.min, type = "coefficients")
+print(coefRidMin)
+```
+
+The equation for the ridge technique is
+$$Score = 988.4952 + 0.0548x_{i, TotalXP} + 97.9385x_{i, Eliminations} - 69.7144x_{i, Deaths} + 2.9341x_{i, Damage} - 301.0472x_{i, XPType} - 379.7301x_{i, WinTRUE}$$
+
+Both methods kept all variables, although if i chose to use the 1se lambda in lasso regression, it would have eliminated 3 of the variables. The actual coefficients for the variables are pretty similar across the Ridge and Lasso methods.
+
+
+## Problem 2b
+```{r}
+rpartobject = rpart(Score~TotalXP+Eliminations+Deaths+Damage+XPType+Win, method = "anova", data = COD3, minbucket = 15)
+summary(rpartobject)
+```
+```{r}
+fancyRpartPlot(rpartobject, cex = 0.7)
+```
+The 3 variables with the highest importance values are Damage(40), Eliminations(38), and TotalXP(10)
+
+
+
+## Problem 2c
+
+```{r}
+XMatScaled <- scale(model.matrix(Score ~ TotalXP + Eliminations + Deaths + Damage + XPType + Win, data = COD3)[,-1])
+
+scaleddf <- data.frame(XMatScaled)
+
+scaleddf$Score <- COD3$Score
+
+lmRidge <- lm(Score ~ ., data = scaleddf)
+summary(lmRidge)
+```
+
+The estimated equation is $$Score = 3104.95 + 388.44x_{i, TotalXP} + 855.77x_{i, Eliminations} - 277.96x_{i, Deaths} + 175,32x_{i, Damage} - 189.09x_{i, XPType} - 228.21x_{i, WinTRUE}$$
+
+```{r}
+lmCoefs <- summary(lmRidge)$coefficients[-1, 1]
+lmCoefs <- abs(lmCoefs)
+print(lmCoefs)
+```
+
+The most important variables based on the magnitude of the coefficients of the liner regression model are Eliminations, with a coefficient of 855.7745, TotalXP, with a coefficient of 388.4409, and Deaths, with a coefficient of 277.9644. The Eliminations is the most important according to this model, followed by TotalXP, followed by Deaths. 
+
+This compares slightly similarly to what was found by the regression trees in part B, with one major difference. That model found Damage to be much more important than this model. Eliminations and TotalXP are both in the top three in both models, making them the safest bet as important variables when predicting score.
+
+Both of us worked on this project together. We went over each part together and while we worked separately on some of the problems, we each proofread them and made sure they were good. 
