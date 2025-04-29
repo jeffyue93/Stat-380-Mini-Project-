@@ -11,6 +11,8 @@ remove(list = ls())
 library(tidyverse)
 library(readxl)
 library(glmnet)
+library(rpart)
+library(rattle)
 COD <- read_excel("CODGames2_mp.xlsx")
 ```
 
@@ -102,6 +104,14 @@ The Lasso Method eliminated Deaths and Damage, while Ridge kept smaller values f
 
 
 ## Problem 2b
+```{r}
+rpartobject = rpart(Score~TotalXP+Eliminations+Deaths+Damage+XPType+Win, method = "anova", data = COD3, minbucket = 15)
+summary(rpartobject)
+```
+```{r}
+fancyRpartPlot(rpartobject, cex = 0.7)
+```
+The 3 variables with the highest importance values are Damage(40), Eliminations(38), and TotalXP(10)
 
 
 
