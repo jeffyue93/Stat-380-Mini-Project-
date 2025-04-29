@@ -101,4 +101,29 @@ $$TotalXP = 1696.2419 + 341.9336x_{i, Eliminations} + 13.1478x_{i, Deaths} + 3.4
 The Lasso Method eliminated Deaths and Damage, while Ridge kept smaller values for them. They both had extremely large coefficients for XPType (double XP + 10%). This shows that that may be the most important variable for predicting the Total XP. Lasso made a simpler model, as it eliminated some variables.
 
 
+## Problem 2b
 
+
+
+## Problem 2c
+
+```{r}
+XMatScaled <- scale(model.matrix(TotalXP ~ Eliminations + Deaths + Damage + XPType + Win, data = COD3)[,-1])
+
+scaleddf <- data.frame(XMatScaled)
+
+scaleddf$TotalXP <- COD3$TotalXP
+
+lmRidge <- lm(TotalXP ~ ., data = scaleddf)
+summary(lmRidge)
+```
+
+The estimated equation is $$TotalXP = 12590.3 + 6039.5x_{Eliminations} + 122.6x_{Deaths} - 3554.6x_{deaths} + 3818.5x_{XPType_DoubleXP_+_10%} + 689.9x_{WinTRUE}$$
+
+```{r}
+lmCoefs <- summary(lmRidge)$coefficients[-1, 1]
+lmCoefs <- abs(lmCoefs)
+print(lmCoefs)
+```
+
+The most important variables based on the magnitude of the coefficients of the liner regression model are Eliminations, with a coefficient of 6039.5451, XPType, with a coefficient of 3818.4585, and Damage, with a coefficient of 3554.6354. The Eliminations is the most important according to this model, followed by an XP Type of Double XP + 10%, followed by Damage. 
